@@ -1,9 +1,14 @@
 package utils
 
+import (
+	"errors"
+	"github.com/ozoncp/ocp-service-api/internal/models"
+)
+
 //SplitToBatches исходный слайс конвертируется в слайс слайсов - чанки одинкового размера (кроме последнего)
-func SplitToBatches(originalSlice []string, batchSize int) [][]string {
+func SplitToBatches(originalSlice []models.Service, batchSize int) [][]models.Service {
 	// TODO: обрабатывать batchSize меньше 1
-	var resultingSlice [][]string
+	var resultingSlice [][]models.Service
 
 	totalLength := len(originalSlice)
 	for i := 0; i < totalLength; i += batchSize {
@@ -18,13 +23,19 @@ func SplitToBatches(originalSlice []string, batchSize int) [][]string {
 }
 
 //ReverseMapKeysAndValues происходит конвертация отображения (“ключ-значение“) в отображение (“значение-ключ“)
-func ReverseMapKeysAndValues(originalMap map[string]string) map[string]string {
+func ReverseMapKeysAndValues(entities []models.Service) (map[uint64]models.Service, error) {
+	reversedMap := map[uint64]models.Service{}
 
-	reversedMap := map[string]string{}
-	for k, v := range originalMap {
-		reversedMap[v] = k
+	for _, v := range entities {
+		currId := v.Id
+		_, ok := reversedMap[currId] // ключ есть в новом словаре
+		if !ok {
+			return nil, errors.New("Duplicate key")
+		}
+
+		reversedMap[v.Id] = v
 	}
-	return reversedMap
+	return reversedMap, nil
 }
 
 func contains(slice []string, value string) bool {
